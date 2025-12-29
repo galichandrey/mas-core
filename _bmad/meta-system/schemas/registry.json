@@ -1,0 +1,245 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MAS Registry Schema",
+  "description": "Complete registry for MAS v2.0 marketplace",
+  "type": "object",
+  "required": ["version", "last_updated", "components"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Registry schema version",
+      "examples": ["2.0.0"]
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last update timestamp"
+    },
+    "meta_system": {
+      "type": "object",
+      "properties": {
+        "version": { "type": "string" },
+        "installed": { "type": "string", "format": "date-time" },
+        "project": { "type": "string" },
+        "format_version": { "type": "integer" },
+        "status": { "type": "string", "enum": ["development", "stable", "deprecated"] }
+      }
+    },
+    "components": {
+      "type": "object",
+      "properties": {
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "version", "path", "description"],
+            "properties": {
+              "name": { "type": "string" },
+              "version": { "type": "string" },
+              "path": { "type": "string" },
+              "location": { "type": "string" },
+              "description": { "type": "string" },
+              "tags": { "type": "array", "items": { "type": "string" } },
+              "type": { "type": "string", "enum": ["base", "meta", "composite"] },
+              "dependencies": { "type": "array", "items": { "type": "string" } },
+              "capabilities": { "type": "array", "items": { "type": "string" } },
+              "usage": { "type": "string" },
+              "compatibility": {
+                "type": "object",
+                "properties": {
+                  "mas": { "type": "string" },
+                  "claude": { "type": "string" }
+                }
+              },
+              "quality": {
+                "type": "object",
+                "properties": {
+                  "validation_status": { "type": "string" },
+                  "test_coverage": { "type": "number" },
+                  "security_score": { "type": "number" }
+                }
+              },
+              "metrics": {
+                "type": "object",
+                "properties": {
+                  "usage_count": { "type": "integer" },
+                  "success_rate": { "type": "number" },
+                  "user_rating": { "type": "number" },
+                  "last_used": { "type": "string", "format": "date-time" }
+                }
+              }
+            }
+          }
+        },
+        "agents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "version", "location", "description"],
+            "properties": {
+              "name": { "type": "string" },
+              "version": { "type": "string" },
+              "location": { "type": "string" },
+              "description": { "type": "string" },
+              "tags": { "type": "array", "items": { "type": "string" } },
+              "commands": { "type": "array", "items": { "type": "string" } },
+              "skills": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "prompts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "version", "location"],
+            "properties": {
+              "name": { "type": "string" },
+              "version": { "type": "string" },
+              "location": { "type": "string" },
+              "description": { "type": "string" },
+              "tags": { "type": "array", "items": { "type": "string" } },
+              "category": { "type": "string" }
+            }
+          }
+        },
+        "templates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "version", "location"],
+            "properties": {
+              "name": { "type": "string" },
+              "version": { "type": "string" },
+              "location": { "type": "string" },
+              "description": { "type": "string" },
+              "tags": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "workflows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "version", "description", "steps"],
+            "properties": {
+              "name": { "type": "string" },
+              "version": { "type": "string" },
+              "description": { "type": "string" },
+              "steps": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "uses": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        },
+        "tools": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "version", "location", "description"],
+            "properties": {
+              "name": { "type": "string" },
+              "version": { "type": "string" },
+              "location": { "type": "string" },
+              "description": { "type": "string" },
+              "usage": { "type": "string" },
+              "tags": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "mcp_servers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "version", "location"],
+            "properties": {
+              "name": { "type": "string" },
+              "version": { "type": "string" },
+              "location": { "type": "string" },
+              "description": { "type": "string" },
+              "tools": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "capabilities": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "marketplace": {
+      "type": "object",
+      "properties": {
+        "url": { "type": "string", "format": "uri" },
+        "last_sync": { "type": "string", "format": "date-time" },
+        "available_skills": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "version": { "type": "string" },
+              "description": { "type": "string" },
+              "author": { "type": "string" },
+              "rating": { "type": "number" },
+              "downloads": { "type": "integer" }
+            }
+          }
+        }
+      }
+    },
+    "integration": {
+      "type": "object",
+      "properties": {
+        "bmad_workflow": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "skill_ecosystem": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "agent_teams": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "changelog": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["version", "date", "changes"],
+        "properties": {
+          "version": { "type": "string" },
+          "date": { "type": "string", "format": "date-time" },
+          "changes": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "examples": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "command", "creates", "output"],
+        "properties": {
+          "name": { "type": "string" },
+          "command": { "type": "string" },
+          "creates": { "type": "array", "items": { "type": "string" } },
+          "output": { "type": "string" }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

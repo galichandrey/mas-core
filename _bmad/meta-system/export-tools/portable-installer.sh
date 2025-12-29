@@ -1,20 +1,25 @@
 #!/bin/bash
 #
-# MAS Universal Installer v2.0
-# Installs Meta Agentic System v2.0 from GitHub with one command
+# MAS Portable Installer v2.0
+# Universal one-file installer for any project
 #
 # Usage:
-#   curl -sSL https://raw.githubusercontent.com/mas-marketplace/mas-core/main/_bmad/meta-system/export-tools/installer.sh | bash
-#   curl -sSL https://get.mas.dev | bash
+#   # Download and run
+#   curl -sSL https://raw.githubusercontent.com/mas-marketplace/mas-core/main/_bmad/meta-system/export-tools/portable-installer.sh | bash
 #
-# Or with options:
-#   curl -sSL https://get.mas.dev | bash -s -- --target ~/project --version 2.0.0 --mode full
+#   # Or with options
+#   curl -sSL https://get.mas.dev | bash -s -- --target ~/my-project --mode full
 #
-# Supports:
-#   - v2.0 schemas (skill.json, registry.json)
-#   - MCP servers (marketplace, prompt-manager, construction, evolution)
-#   - Portable installation
-#   - BMAD integration
+#   # From local file
+#   ./portable-installer.sh --target ~/my-project
+#
+# Features:
+#   - Zero dependencies (except curl/wget)
+#   - Works on Linux, macOS, WSL
+#   - BMAD-safe (never modifies BMAD files)
+#   - One-command installation
+#   - Supports v2.0 schemas
+#   - MCP server integration
 #
 
 set -e
@@ -32,12 +37,12 @@ REPO="mas-marketplace/mas-core"
 BRANCH="main"
 VERSION="latest"
 TARGET="."
+MODE="full"
 QUIET=false
 VERBOSE=false
-MODE="full"  # full, minimal, skill-only, portable
 INCLUDE_MCP=true
 
-# Parse command line arguments (from stdin or direct)
+# Parse arguments
 parse_args() {
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -61,11 +66,7 @@ parse_args() {
                 MODE="$2"
                 shift 2
                 ;;
-            --include-mcp)
-                INCLUDE_MCP=true
-                shift
-                ;;
-            --no-include-mcp)
+            --no-mcp)
                 INCLUDE_MCP=false
                 shift
                 ;;
@@ -89,44 +90,53 @@ parse_args() {
 
 show_help() {
     cat << EOF
-MAS Installer v2.0.0
+MAS Portable Installer v2.0.0
 
 Usage:
+  # One-line install (recommended)
   curl -sSL https://get.mas.dev | bash
-  curl -sSL https://get.mas.dev | bash -s -- --target ~/project --version 2.0.0 --mode full
+
+  # Install to specific project
+  curl -sSL https://get.mas.dev | bash -s -- --target ~/my-project
+
+  # Install specific version
+  curl -sSL https://get.mas.dev | bash -s -- --version 2.0.0
+
+  # Install without MCP servers
+  curl -sSL https://get.mas.dev | bash -s -- --no-mcp
+
+  # Minimal install (export tools only)
+  curl -sSL https://get.mas.dev | bash -s -- --mode minimal
 
 Options:
-  --target <path>      Installation directory (default: current)
-  --version <ver>      Specific version (default: latest)
-  --repo <org/repo>    GitHub repository (default: mas-marketplace/mas-core)
-  --branch <name>      Git branch (default: main)
-  --mode <full|minimal|skill-only|portable>  What to install
-  --include-mcp        Install MCP servers (default: true for full mode)
-  --quiet              Suppress output
-  --verbose            Show detailed info
-  --help               Show this help
+  --target <path>    Installation directory (default: current)
+  --version <ver>    Specific version (default: latest)
+  --repo <org/repo>  GitHub repository
+  --branch <name>    Git branch
+  --mode <mode>      full | minimal | skill-only | portable
+  --no-mcp           Skip MCP servers
+  --quiet            Suppress output
+  --verbose          Show detailed info
+  --help             Show this help
 
 Modes:
-  full         - Everything (meta-skills, export tools, MCP servers, schemas)
+  full         - Everything (recommended)
   minimal      - Export tools only
   skill-only   - Meta-skills only
   portable     - Minimal + portable installer
 
 Examples:
-  # Quick install (full v2.0)
+  # Quick install
   curl -sSL https://get.mas.dev | bash
 
-  # Install to project with MCP
-  curl -sSL https://get.mas.dev | bash -s -- --target /path/to/project --version 2.0.0
-
-  # Install portable package
-  curl -sSL https://get.mas.dev | bash -s -- --mode portable
-
-  # Install without MCP servers
-  curl -sSL https://get.mas.dev | bash -s -- --mode full --no-include-mcp
+  # Install to project
+  curl -sSL https://get.mas.dev | bash -s -- --target /path/to/project
 
   # BMAD integration
   curl -sSL https://get.mas.dev | bash -s -- --target /home/ag/Documents/Life/enrich-me
+
+  # Development version
+  curl -sSL https://get.mas.dev | bash -s -- --branch main --mode full
 
 EOF
     exit 0
@@ -177,12 +187,7 @@ check_prereqs() {
         missing+=("curl or wget")
     fi
 
-    # Check for git (optional, for updates)
-    if ! command -v git &> /dev/null; then
-        log_warn "git not found, updates will use curl only"
-    fi
-
-    # Check for tar/gzip
+    # Check for tar
     if ! command -v tar &> /dev/null; then
         missing+=("tar")
     fi
@@ -223,7 +228,7 @@ download_from_github() {
     if [ "$version" = "latest" ]; then
         # Get latest release
         if command -v curl &> /dev/null; then
-            version=$(curl -s "https://api.github.com/repos/$repo/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+            version=$(curl -s "https://api.github.com/repos/$repo/releases/latest" | grep '\"tag_name\":' | sed -E 's/.*\"([^\"]+)\".*/\\1/')
             if [ -z "$version" ]; then
                 version="main"  # Fallback to main branch
             fi
@@ -536,11 +541,18 @@ generate_guide() {
 - meta-prompt-generator
 - meta-system-validator
 
-### Export Tools (4)
-- install-from-marketplace.sh
+### Export Tools (5)
+- installer.sh
+- updater.sh
 - validate-system.sh
-- export-system.sh
-- export-skill.sh
+- publisher.sh
+- export-bmad-skills.sh
+
+### MCP Servers (4)
+- marketplace.js
+- prompt-manager.js
+- construction.js
+- evolution.js
 
 ## Next Steps
 
@@ -555,8 +567,13 @@ If validation fails:
 ./_bmad/meta-system/export-tools/validate-system.sh --quick
 \`\`\`
 
+If you need to migrate from v1.1.0:
+\`\`\`bash
+./_bmad/meta-system/export-tools/updater.sh --migrate-v1-to-v2
+\`\`\`
+
 ---
-*MAS Installer v1.0.0*
+*MAS Portable Installer v2.0.0*
 EOF
 
     log_success "Installation guide created: MAS-INSTALL-README.md"
@@ -586,7 +603,7 @@ main() {
 
     if [ "$QUIET" = false ]; then
         echo -e "${BLUE}════════════════════════════════════════════════════════════${NC}"
-        echo -e "${BLUE}  MAS Universal Installer v1.0.0                           ${NC}"
+        echo -e "${BLUE}  MAS Portable Installer v2.0.0                            ${NC}"
         echo -e "${BLUE}════════════════════════════════════════════════════════════${NC}"
         echo ""
     fi

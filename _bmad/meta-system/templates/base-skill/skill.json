@@ -1,0 +1,40 @@
+{
+  "name": "skill-name",
+  "version": "1.0.0",
+  "type": "base",
+  "description": "What it does AND when to use it (include trigger context)",
+  "tags": ["category", "function"],
+  "capabilities": ["capability-1", "capability-2"],
+  "type_specific": {
+    "base": {
+      "atomic": true,
+      "dependencies": []
+    }
+  },
+  "dependencies": {
+    "skills": [],
+    "agents": [],
+    "tools": []
+  },
+  "compatibility": {
+    "mas": ">=1.0.0",
+    "claude": ">=3.5",
+    "platforms": ["linux", "macos", "windows"]
+  },
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": "https://github.com/your-org/skill-name",
+  "metadata": {
+    "token_usage": "medium",
+    "execution_time": "fast",
+    "difficulty": "intermediate",
+    "auto_trigger": true,
+    "cost_credits": 0
+  },
+  "quality": {
+    "validation_status": "unverified",
+    "test_coverage": 0,
+    "security_score": 0,
+    "docs_quality": "basic"
+  }
+}

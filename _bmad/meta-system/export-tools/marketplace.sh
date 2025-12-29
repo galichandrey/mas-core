@@ -131,15 +131,15 @@ log_info() {
 }
 
 log_success() {
-    echo -e "${GREEN}[✓]${NC} $1"
+    echo -e "${GREEN}[]${NC} $1"
 }
 
 log_warn() {
-    echo -e "${YELLOW}[⚠]${NC} $1"
+    echo -e "${YELLOW}[]${NC} $1"
 }
 
 log_error() {
-    echo -e "${RED}[✗]${NC} $1" >&2
+    echo -e "${RED}[]${NC} $1" >&2
 }
 
 # Fetch registry
@@ -213,7 +213,7 @@ for cat, cat_skills in categories.items():
         tags = skill.get('tags', [])
         status = skill.get('validation_status', 'unknown')
 
-        status_icon = "✅" if status == "verified" else "⚠️" if status == "pending" else "❌"
+        status_icon = "" if status == "verified" else "" if status == "pending" else ""
 
         print(f"    {status_icon} {name} (v{version})")
         print(f"       {desc}")
@@ -263,7 +263,7 @@ for skill in matches:
     tags = skill.get('tags', [])
     status = skill.get('validation_status', 'unknown')
 
-    status_icon = "✅" if status == "verified" else "⚠️"
+    status_icon = "" if status == "verified" else ""
 
     print(f"    {status_icon} {name} (v{version})")
     print(f"       {desc}")
@@ -298,9 +298,9 @@ if not skill:
     print(f"  Skill '{skill_name}' not found")
     sys.exit(1)
 
-print(f"\n  ═══════════════════════════════════════════════════════")
+print(f"\n  ")
 print(f"  {skill.get('name', 'Unknown')}")
-print(f"  ═══════════════════════════════════════════════════════\n")
+print(f"  \n")
 
 print(f"  Version:      {skill.get('version', '1.0.0')}")
 print(f"  Author:       {skill.get('author', 'Unknown')}")
@@ -322,7 +322,7 @@ if deps:
 
 print(f"\n  GitHub:       {skill.get('github', 'N/A')}")
 print(f"  Last Updated: {skill.get('last_updated', 'N/A')}")
-print(f"\n  ═══════════════════════════════════════════════════════")
+print(f"\n  ")
 EOF
 }
 
@@ -366,13 +366,13 @@ EOF
     local status=$(echo "$skill_info" | python3 -c "import json, sys; print(json.load(sys.stdin).get('validation_status', 'unknown'))")
 
     if [ "$status" = "verified" ]; then
-        log_success "✅ Verified skill - safe to install"
+        log_success " Verified skill - safe to install"
         return 0
     elif [ "$status" = "pending" ]; then
-        log_warn "⚠️  Pending review - use with caution"
+        log_warn "  Pending review - use with caution"
         return 1
     else
-        log_error "❌ Not verified - do not install"
+        log_error " Not verified - do not install"
         return 1
     fi
 }

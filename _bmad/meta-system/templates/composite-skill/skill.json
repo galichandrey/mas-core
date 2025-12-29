@@ -1,0 +1,43 @@
+{
+  "name": "composite-skill-name",
+  "version": "1.0.0",
+  "type": "composite",
+  "description": "Orchestrates [base skills] for [workflow purpose]. Use when [specific workflow scenario]",
+  "tags": ["composite", "workflow", "orchestration"],
+  "capabilities": ["workflow-orchestration", "multi-skill-coordination", "result-aggregation"],
+  "type_specific": {
+    "composite": {
+      "composition_type": "sequential",
+      "base_skills": [
+        { "name": "base-skill-1", "role": "input", "optional": false },
+        { "name": "base-skill-2", "role": "processing", "optional": false },
+        { "name": "base-skill-3", "role": "output", "optional": false }
+      ]
+    }
+  },
+  "dependencies": {
+    "skills": ["base-skill-1", "base-skill-2", "base-skill-3"],
+    "agents": ["coordinator"],
+    "tools": []
+  },
+  "compatibility": {
+    "mas": ">=1.2.0",
+    "claude": ">=3.5"
+  },
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": "https://github.com/your-org/composite-skill-name",
+  "metadata": {
+    "token_usage": "high",
+    "execution_time": "medium",
+    "difficulty": "intermediate",
+    "auto_trigger": true,
+    "cost_credits": 0
+  },
+  "quality": {
+    "validation_status": "unverified",
+    "test_coverage": 0,
+    "security_score": 0,
+    "docs_quality": "basic"
+  }
+}

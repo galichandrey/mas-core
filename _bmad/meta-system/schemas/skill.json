@@ -1,0 +1,431 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MAS Skill Package Manifest",
+  "description": "Complete specification for MAS v2.0 skill packages",
+  "type": "object",
+  "required": ["name", "version", "type", "description"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Skill identifier (lowercase, digits, hyphens only)",
+      "examples": ["json-validator", "data-processor", "api-monitor"]
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version (MAJOR.MINOR.PATCH)",
+      "examples": ["1.0.0", "2.1.3"]
+    },
+    "type": {
+      "type": "string",
+      "enum": ["base", "meta", "composite"],
+      "description": "Skill classification",
+      "examples": [
+        "base: atomic capability",
+        "meta: creates/modifies skills",
+        "composite: workflow of base skills"
+      ]
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1024,
+      "pattern": ".*\\b(what|when|use|if|when user|when task).*",
+      "description": "What it does AND when to use it (must include trigger context)",
+      "examples": [
+        "Validates JSON files against schemas. Use when user needs to check JSON structure or data integrity.",
+        "Creates new skills from natural language. Use when building new capabilities or extending existing skills."
+      ]
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z-]+$" },
+      "minItems": 1,
+      "description": "Categorization tags for discovery",
+      "examples": ["validation", "json", "testing", "meta", "creation"]
+    },
+    "capabilities": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 3 },
+      "minItems": 1,
+      "description": "Specific capabilities provided by this skill",
+      "examples": [
+        "schema-validation",
+        "error-reporting-with-line-numbers",
+        "batch-processing",
+        "natural-language-to-skill-conversion"
+      ]
+    },
+    "type_specific": {
+      "type": "object",
+      "description": "Type-specific configuration",
+      "properties": {
+        "base": {
+          "type": "object",
+          "properties": {
+            "atomic": { "type": "boolean", "description": "Single responsibility" },
+            "dependencies": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "External dependencies (not MAS skills)"
+            }
+          }
+        },
+        "meta": {
+          "type": "object",
+          "properties": {
+            "creates": {
+              "type": "array",
+              "items": { "type": "string", "enum": ["skill", "agent", "prompt", "system"] },
+              "description": "What this meta-skill can create"
+            },
+            "self_improvement": {
+              "type": "boolean",
+              "description": "Can this meta-skill improve itself?"
+            }
+          }
+        },
+        "composite": {
+          "type": "object",
+          "properties": {
+            "composition_type": {
+              "type": "string",
+              "enum": ["sequential", "parallel", "conditional", "recursive"],
+              "description": "How base skills are orchestrated"
+            },
+            "base_skills": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "role": { "type": "string" },
+                  "optional": { "type": "boolean" }
+                },
+                "required": ["name", "role"]
+              },
+              "description": "Skills this composite depends on"
+            }
+          }
+        }
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "properties": {
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+(@\\^?\\d+\\.\\d+\\.\\d+)?$"
+          },
+          "description": "MAS skill dependencies with version constraints"
+        },
+        "agents": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Compatible agent types"
+        },
+        "tools": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "External tools or MCP servers"
+        }
+      }
+    },
+    "compatibility": {
+      "type": "object",
+      "properties": {
+        "mas": {
+          "type": "string",
+          "description": "MAS version requirement",
+          "examples": [">=1.0.0", "^2.0.0"]
+        },
+        "claude": {
+          "type": "string",
+          "description": "Claude model requirement",
+          "examples": [">=3.5", "^4.0"]
+        },
+        "platforms": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["linux", "macos", "windows"] }
+        }
+      }
+    },
+    "author": {
+      "type": "string",
+      "description": "Author name or organization",
+      "examples": ["MAS Team", "Community Contributor"]
+    },
+    "license": {
+      "type": "string",
+      "enum": ["MIT", "Apache-2.0", "GPL-3.0"],
+      "description": "Software license"
+    },
+    "repository": {
+      "type": "string",
+      "format": "uri",
+      "description": "GitHub repository URL",
+      "examples": ["https://github.com/mas-marketplace/skill-name"]
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "token_usage": {
+          "type": "string",
+          "enum": ["low", "medium", "high"],
+          "description": "Expected token consumption per invocation"
+        },
+        "execution_time": {
+          "type": "string",
+          "enum": ["fast", "medium", "slow"],
+          "description": "Expected execution time"
+        },
+        "difficulty": {
+          "type": "string",
+          "enum": ["beginner", "intermediate", "advanced"],
+          "description": "Complexity level"
+        },
+        "auto_trigger": {
+          "type": "boolean",
+          "description": "Should auto-trigger based on description?"
+        },
+        "cost_credits": {
+          "type": "number",
+          "description": "Marketplace cost (0 = free)"
+        }
+      }
+    },
+    "quality": {
+      "type": "object",
+      "properties": {
+        "validation_status": {
+          "type": "string",
+          "enum": ["unverified", "pending", "verified", "premium"],
+          "description": "Marketplace verification level"
+        },
+        "test_coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Test coverage percentage"
+        },
+        "security_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Security audit score"
+        },
+        "docs_quality": {
+          "type": "string",
+          "enum": ["basic", "good", "excellent"],
+          "description": "Documentation quality"
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "usage_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total invocations"
+        },
+        "success_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Success rate (0-1)"
+        },
+        "user_rating": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 5,
+          "description": "Average user rating"
+        },
+        "last_updated": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp"
+        }
+      }
+    },
+    "evolution": {
+      "type": "object",
+      "properties": {
+        "previous_versions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Version history"
+        },
+        "migration_guide": {
+          "type": "string",
+          "description": "Path to migration guide"
+        },
+        "changelog": {
+          "type": "string",
+          "description": "Path to changelog"
+        }
+      }
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "name": "json-validator",
+      "version": "1.2.0",
+      "type": "base",
+      "description": "Validates JSON files against schemas, provides detailed error reports with line numbers and suggestions. Use when user needs to validate JSON structure, check data integrity, or debug JSON parsing errors.",
+      "tags": ["validation", "json", "testing"],
+      "capabilities": ["schema-validation", "error-reporting", "batch-processing"],
+      "type_specific": {
+        "base": {
+          "atomic": true,
+          "dependencies": ["python-jsonschema"]
+        }
+      },
+      "dependencies": {
+        "skills": [],
+        "agents": ["quality-checker"],
+        "tools": []
+      },
+      "compatibility": {
+        "mas": ">=1.0.0",
+        "claude": ">=3.5",
+        "platforms": ["linux", "macos", "windows"]
+      },
+      "author": "MAS Team",
+      "license": "MIT",
+      "repository": "https://github.com/mas-marketplace/mas-skills/tree/main/json-validator",
+      "metadata": {
+        "token_usage": "medium",
+        "execution_time": "fast",
+        "difficulty": "intermediate",
+        "auto_trigger": true,
+        "cost_credits": 0
+      },
+      "quality": {
+        "validation_status": "verified",
+        "test_coverage": 85,
+        "security_score": 95,
+        "docs_quality": "excellent"
+      },
+      "metrics": {
+        "usage_count": 1250,
+        "success_rate": 0.94,
+        "user_rating": 4.8,
+        "last_updated": "2025-12-28T10:30:00Z"
+      },
+      "evolution": {
+        "previous_versions": ["1.0.0", "1.1.0"],
+        "migration_guide": "references/migration-v1-to-v2.md",
+        "changelog": "references/changelog.md"
+      }
+    },
+    {
+      "name": "meta-skill-creator",
+      "version": "2.0.0",
+      "type": "meta",
+      "description": "Creates complete skill packages from natural language descriptions. Generates SKILL.md, skill.json, resource directories, and validation. Use when building new capabilities, extending existing skills, or creating reusable templates.",
+      "tags": ["meta", "skill", "creation", "generator"],
+      "capabilities": ["natural-language-to-skill", "structure-generation", "validation", "template-creation"],
+      "type_specific": {
+        "meta": {
+          "creates": ["skill"],
+          "self_improvement": true
+        }
+      },
+      "dependencies": {
+        "skills": ["meta-prompt-generator", "meta-system-validator"],
+        "agents": [],
+        "tools": ["mas-marketplace"]
+      },
+      "compatibility": {
+        "mas": "^2.0.0",
+        "claude": ">=3.5"
+      },
+      "author": "MAS Team",
+      "license": "MIT",
+      "repository": "https://github.com/mas-marketplace/mas-core/tree/main/.claude/skills/meta-skill-creator",
+      "metadata": {
+        "token_usage": "high",
+        "execution_time": "medium",
+        "difficulty": "advanced",
+        "auto_trigger": true,
+        "cost_credits": 0
+      },
+      "quality": {
+        "validation_status": "premium",
+        "test_coverage": 92,
+        "security_score": 98,
+        "docs_quality": "excellent"
+      },
+      "metrics": {
+        "usage_count": 3421,
+        "success_rate": 0.96,
+        "user_rating": 4.9,
+        "last_updated": "2025-12-29T15:20:00Z"
+      },
+      "evolution": {
+        "previous_versions": ["1.0.0", "1.1.0"],
+        "migration_guide": "references/migration-v1-to-v2.md",
+        "changelog": "references/changelog.md"
+      }
+    },
+    {
+      "name": "data-pipeline",
+      "version": "1.0.0",
+      "type": "composite",
+      "description": "Complete data processing pipeline: reads CSV/JSON, validates against schemas, transforms data, and exports results. Use when processing data files with validation and transformation requirements.",
+      "tags": ["data", "pipeline", "workflow", "composite"],
+      "capabilities": ["multi-format-input", "schema-validation", "data-transformation", "batch-export"],
+      "type_specific": {
+        "composite": {
+          "composition_type": "sequential",
+          "base_skills": [
+            { "name": "file-reader", "role": "input", "optional": false },
+            { "name": "json-validator", "role": "validation", "optional": false },
+            { "name": "data-transformer", "role": "processing", "optional": false },
+            { "name": "file-writer", "role": "output", "optional": false }
+          ]
+        }
+      },
+      "dependencies": {
+        "skills": ["file-reader", "json-validator", "data-transformer", "file-writer"],
+        "agents": ["quality-checker"],
+        "tools": []
+      },
+      "compatibility": {
+        "mas": ">=1.2.0",
+        "claude": ">=3.5"
+      },
+      "author": "MAS Team",
+      "license": "MIT",
+      "repository": "https://github.com/mas-marketplace/mas-skills/tree/main/data-pipeline",
+      "metadata": {
+        "token_usage": "high",
+        "execution_time": "medium",
+        "difficulty": "intermediate",
+        "auto_trigger": true,
+        "cost_credits": 0
+      },
+      "quality": {
+        "validation_status": "verified",
+        "test_coverage": 78,
+        "security_score": 90,
+        "docs_quality": "good"
+      },
+      "metrics": {
+        "usage_count": 567,
+        "success_rate": 0.91,
+        "user_rating": 4.7,
+        "last_updated": "2025-12-27T09:15:00Z"
+      },
+      "evolution": {
+        "previous_versions": [],
+        "migration_guide": null,
+        "changelog": "references/changelog.md"
+      }
+    }
+  ]
+}

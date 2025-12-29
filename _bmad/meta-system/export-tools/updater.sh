@@ -1,13 +1,20 @@
 #!/bin/bash
 #
-# MAS Updater
-# Updates Meta Agentic System to latest version
+# MAS Updater v2.0
+# Updates Meta Agentic System to latest version with v2.0 schema support
 #
 # Usage:
 #   ./updater.sh
 #   ./updater.sh --check
-#   ./updater.sh --version 1.2.0
+#   ./updater.sh --version 2.0.0
 #   ./updater.sh --bulk ~/projects/*
+#   ./updater.sh --migrate-v1-to-v2
+#
+# Supports:
+#   - v2.0 schemas (skill.json, registry.json)
+#   - MCP servers updates
+#   - Schema migration (v1.1.0  v2.0)
+#   - Safe rollback
 #
 
 set -e
@@ -29,6 +36,8 @@ CHECK_ONLY=false
 BULK_MODE=false
 AUTO_CONFIRM=false
 BACKUP_DIR=""
+MIGRATE_V1_TO_V2=false
+UPDATE_MCP=true
 
 # Parse arguments
 parse_args() {
@@ -58,6 +67,14 @@ parse_args() {
                 AUTO_CONFIRM=true
                 shift
                 ;;
+            --migrate-v1-to-v2)
+                MIGRATE_V1_TO_V2=true
+                shift
+                ;;
+            --no-mcp)
+                UPDATE_MCP=false
+                shift
+                ;;
             --help)
                 show_help
                 ;;
@@ -74,13 +91,14 @@ parse_args() {
 
 show_help() {
     cat << EOF
-MAS Updater v1.0.0
+MAS Updater v2.0.0
 
 Usage:
   ./updater.sh                          # Update current project
   ./updater.sh --check                  # Check for updates only
-  ./updater.sh --version 1.2.0          # Update to specific version
+  ./updater.sh --version 2.0.0          # Update to specific version
   ./updater.sh --bulk ~/projects/*      # Update multiple projects
+  ./updater.sh --migrate-v1-to-v2       # Migrate from v1.1.0 to v2.0
 
 Options:
   --check              Check for updates without installing
@@ -89,6 +107,8 @@ Options:
   --target <path>      Project directory
   --bulk               Update multiple projects
   --yes                Auto-confirm updates
+  --migrate-v1-to-v2   Migrate v1.1.0 to v2.0 schema
+  --no-mcp             Skip MCP server updates
   --help               Show this help
 
 Examples:
@@ -99,7 +119,10 @@ Examples:
   ./updater.sh
 
   # Update to specific version
-  ./updater.sh --version 1.2.0
+  ./updater.sh --version 2.0.0
+
+  # Migrate from v1.1.0 to v2.0
+  ./updater.sh --migrate-v1-to-v2
 
   # Update all projects in directory
   ./updater.sh --bulk ~/projects/*
@@ -142,7 +165,7 @@ get_current_version() {
     if [ -f "$TARGET/.mas-version" ]; then
         CURRENT_VERSION=$(cat "$TARGET/.mas-version")
     elif [ -f "$TARGET/_bmad/meta-system/registry.yaml" ]; then
-        CURRENT_VERSION=$(grep "version:" "$TARGET/_bmad/meta-system/registry.yaml" | head -1 | awk '{print $2}' | tr -d '"')
+        CURRENT_VERSION=$(grep "version:" "$TARGET/_bmad/meta-system/registry.yaml" | head -1 | awk '{print $2}' | tr -d '\"')
     else
         CURRENT_VERSION="unknown"
     fi
@@ -157,7 +180,7 @@ get_latest_version() {
     log_info "Checking for updates from $REPO..."
 
     if command -v curl &> /dev/null; then
-        LATEST_VERSION=$(curl -s "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+        LATEST_VERSION=$(curl -s "https://api.github.com/repos/$REPO/releases/latest" | grep '\"tag_name\":' | sed -E 's/.*\"([^\"]+)\".*/\\1/')
         if [ -z "$LATEST_VERSION" ]; then
             # Fallback to main branch
             LATEST_VERSION="main"
@@ -191,7 +214,7 @@ compare_versions() {
         log_info "Already up to date (v$current)"
         return 1
     else
-        log_info "Update available: v$current → v$latest"
+        log_info "Update available: v$current  v$latest"
         return 0
     fi
 }
@@ -214,6 +237,10 @@ create_backup() {
 
     if [ -f "$TARGET/MAS-INSTALL-README.md" ]; then
         cp "$TARGET/MAS-INSTALL-README.md" "$BACKUP_DIR/"
+    fi
+
+    if [ -f "$TARGET/.mcp.json" ]; then
+        cp "$TARGET/.mcp.json" "$BACKUP_DIR/"
     fi
 
     log_success "Backup created"
@@ -253,6 +280,86 @@ download_update() {
     echo "$temp_dir"
 }
 
+# Migrate from v1.1.0 to v2.0
+migrate_v1_to_v2() {
+    log_info "Migrating from v1.1.0 to v2.0..."
+
+    # Check if v1.1.0 is installed
+    if [ ! -d "$TARGET/_bmad/meta-system" ]; then
+        log_error "MAS not found in $TARGET"
+        exit 1
+    fi
+
+    # Create v2.0 directory structure
+    mkdir -p "$TARGET/_bmad/meta-system/mcp-servers"
+    mkdir -p "$TARGET/_bmad/meta-system/schemas"
+    mkdir -p "$TARGET/_bmad/meta-system/templates"
+    mkdir -p "$TARGET/_bmad/_cache"
+
+    # Copy v2.0 schemas if available
+    if [ -f "$TARGET/_bmad/meta-system/schemas/skill.json" ]; then
+        log_success "v2.0 schemas already present"
+    else
+        log_warn "v2.0 schemas not found - will be added on next update"
+    fi
+
+    # Update export tools to v2.0
+    if [ -f "$TARGET/_bmad/meta-system/export-tools/installer.sh" ]; then
+        local installer_version=$(grep "MAS Universal Installer" "$TARGET/_bmad/meta-system/export-tools/installer.sh" | grep -o "v[0-9.]*" | head -1)
+        if [[ "$installer_version" == "v2.0"* ]]; then
+            log_success "Export tools already at v2.0"
+        else
+            log_warn "Export tools need update - run updater.sh again"
+        fi
+    fi
+
+    # Create .mcp.json if missing
+    if [ ! -f "$TARGET/.mcp.json" ] && [ -d "$TARGET/_bmad/meta-system/mcp-servers" ]; then
+        cat > "$TARGET/.mcp.json" << 'EOF'
+{
+  "mcpServers": {
+    "mas-marketplace": {
+      "command": "node",
+      "args": ["_bmad/meta-system/mcp-servers/marketplace.js"],
+      "env": {
+        "MAS_PROJECT_ROOT": "${workspaceFolder}"
+      }
+    },
+    "mas-prompt-manager": {
+      "command": "node",
+      "args": ["_bmad/meta-system/mcp-servers/prompt-manager.js"],
+      "env": {
+        "MAS_PROJECT_ROOT": "${workspaceFolder}"
+      }
+    },
+    "mas-construction": {
+      "command": "node",
+      "args": ["_bmad/meta-system/mcp-servers/construction.js"],
+      "env": {
+        "MAS_PROJECT_ROOT": "${workspaceFolder}"
+      }
+    },
+    "mas-evolution": {
+      "command": "node",
+      "args": ["_bmad/meta-system/mcp-servers/evolution.js"],
+      "env": {
+        "MAS_PROJECT_ROOT": "${workspaceFolder}"
+      }
+    }
+  }
+}
+EOF
+        log_success "Created .mcp.json configuration"
+    fi
+
+    # Update version file
+    echo "2.0.0" > "$TARGET/.mas-version"
+    log_success "Version updated to 2.0.0"
+
+    log_success "Migration complete!"
+    log_info "Next: Run ./updater.sh to get latest v2.0 components"
+}
+
 # Apply update
 apply_update() {
     local temp_dir="$1"
@@ -278,10 +385,71 @@ apply_update() {
         log_success "Export tools updated"
     fi
 
+    # Update MCP servers (if requested)
+    if [ "$UPDATE_MCP" = true ] && [ -d "$temp_dir/_bmad/meta-system/mcp-servers" ]; then
+        mkdir -p "$TARGET/_bmad/meta-system/mcp-servers"
+        cp -r "$temp_dir/_bmad/meta-system/mcp-servers/"* "$TARGET/_bmad/meta-system/mcp-servers/"
+        chmod +x "$TARGET/_bmad/meta-system/mcp-servers/"*.js
+        log_success "MCP servers updated"
+    fi
+
+    # Update schemas
+    if [ -d "$temp_dir/_bmad/meta-system/schemas" ]; then
+        mkdir -p "$TARGET/_bmad/meta-system/schemas"
+        cp -r "$temp_dir/_bmad/meta-system/schemas/"* "$TARGET/_bmad/meta-system/schemas/"
+        log_success "v2.0 schemas updated"
+    fi
+
+    # Update templates
+    if [ -d "$temp_dir/_bmad/meta-system/templates" ]; then
+        mkdir -p "$TARGET/_bmad/meta-system/templates"
+        cp -r "$temp_dir/_bmad/meta-system/templates/"* "$TARGET/_bmad/meta-system/templates/"
+        log_success "Templates updated"
+    fi
+
     # Update registry
     if [ -f "$temp_dir/_bmad/meta-system/registry.yaml" ]; then
         cp "$temp_dir/_bmad/meta-system/registry.yaml" "$TARGET/_bmad/meta-system/"
         log_success "Registry updated"
+    fi
+
+    # Update .mcp.json if needed
+    if [ "$UPDATE_MCP" = true ] && [ ! -f "$TARGET/.mcp.json" ] && [ -d "$TARGET/_bmad/meta-system/mcp-servers" ]; then
+        cat > "$TARGET/.mcp.json" << 'EOF'
+{
+  "mcpServers": {
+    "mas-marketplace": {
+      "command": "node",
+      "args": ["_bmad/meta-system/mcp-servers/marketplace.js"],
+      "env": {
+        "MAS_PROJECT_ROOT": "${workspaceFolder}"
+      }
+    },
+    "mas-prompt-manager": {
+      "command": "node",
+      "args": ["_bmad/meta-system/mcp-servers/prompt-manager.js"],
+      "env": {
+        "MAS_PROJECT_ROOT": "${workspaceFolder}"
+      }
+    },
+    "mas-construction": {
+      "command": "node",
+      "args": ["_bmad/meta-system/mcp-servers/construction.js"],
+      "env": {
+        "MAS_PROJECT_ROOT": "${workspaceFolder}"
+      }
+    },
+    "mas-evolution": {
+      "command": "node",
+      "args": ["_bmad/meta-system/mcp-servers/evolution.js"],
+      "env": {
+        "MAS_PROJECT_ROOT": "${workspaceFolder}"
+      }
+    }
+  }
+}
+EOF
+        log_success "Created .mcp.json"
     fi
 
     # Update version
@@ -319,6 +487,8 @@ confirm_update() {
     echo "  - Create backup in $TARGET/_bmad-backup-*"
     echo "  - Update meta-skills"
     echo "  - Update export tools"
+    echo "  - Update MCP servers"
+    echo "  - Update schemas"
     echo "  - Update registry"
     echo ""
     read -p "Continue? [y/N] " -n 1 -r
@@ -357,11 +527,13 @@ generate_report() {
 **Target:** $TARGET
 
 ## Summary
-✅ Update completed successfully
+ Update completed successfully
 
 ## Changes
 - Meta-skills: Updated
 - Export tools: Updated
+- MCP servers: Updated
+- Schemas: Updated
 - Registry: Updated
 - Version: $LATEST_VERSION
 
@@ -379,7 +551,7 @@ cp -r $BACKUP_DIR/meta-system $TARGET/_bmad/
 \`\`\`
 
 ---
-*MAS Updater v1.0.0*
+*MAS Updater v2.0.0*
 EOF
 
     log_success "Update report: $report"
@@ -446,9 +618,15 @@ main() {
 
     parse_args "$@"
 
-    echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${BLUE}║  MAS Updater v1.0.0                                        ║${NC}"
-    echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
+    # Handle migration mode
+    if [ "$MIGRATE_V1_TO_V2" = true ]; then
+        migrate_v1_to_v2
+        exit 0
+    fi
+
+    echo -e "${BLUE}════════════════════════════════════════════════════════════${NC}"
+    echo -e "${BLUE}  MAS Updater v2.0.0                                        ${NC}"
+    echo -e "${BLUE}════════════════════════════════════════════════════════════${NC}"
     echo ""
 
     # Get current version
@@ -496,9 +674,9 @@ main() {
     generate_report
 
     echo ""
-    echo -e "${GREEN}╔════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║  Update Complete!                                          ║${NC}"
-    echo -e "${GREEN}╚════════════════════════════════════════════════════════════╝${NC}"
+    echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
+    echo -e "${GREEN}  Update Complete!                                          ${NC}"
+    echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
     echo ""
     echo -e "From: ${CYAN}$CURRENT_VERSION${NC}"
     echo -e "To:   ${CYAN}$LATEST_VERSION${NC}"

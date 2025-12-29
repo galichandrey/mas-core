@@ -65,13 +65,13 @@ cp -r "$SKILL_PATH" "$TARGET_DIR/.claude/skills/"
 
 # Validate
 if [ -d "$TARGET_DIR/.claude/skills/$SKILL_NAME" ]; then
-    echo -e "${GREEN}✓ Successfully copied $SKILL_NAME${NC}"
+    echo -e "${GREEN} Successfully copied $SKILL_NAME${NC}"
     echo ""
     echo -e "${YELLOW}Files copied:${NC}"
     find "$TARGET_DIR/.claude/skills/$SKILL_NAME" -type f | sed "s|$TARGET_DIR/||"
     echo ""
-    echo -e "${GREEN}✅ Ready to use in $TARGET_DIR${NC}"
+    echo -e "${GREEN} Ready to use in $TARGET_DIR${NC}"
 else
-    echo -e "${RED}✗ Copy failed${NC}"
+    echo -e "${RED} Copy failed${NC}"
     exit 1
 fi

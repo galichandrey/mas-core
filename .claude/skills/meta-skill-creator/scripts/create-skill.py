@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 """
-Meta Skill Creator - Creates complete skill packages
+Meta Skill Creator v2.0 - Creates complete MAS v2.0 skill packages
 
 Usage:
-    python create-skill.py <skill-name> --path <output-directory>
+    python create-skill.py <skill-name> --type <base|meta|composite> --path <output-directory> --desc "<description>"
 
 Example:
-    python create-skill.py data-processor --path ./skills
+    python create-skill.py data-processor --type base --path ./skills --desc "Processes CSV files with validation"
+    python create-skill.py skill-creator --type meta --path ./skills --desc "Creates skills from natural language"
+    python create-skill.py data-pipeline --type composite --path ./skills --desc "Orchestrates read-validate-transform-write"
 """
 
 import sys
 import os
+import json
 from pathlib import Path
 import argparse
 

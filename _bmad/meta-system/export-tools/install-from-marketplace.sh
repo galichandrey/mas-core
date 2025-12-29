@@ -42,15 +42,15 @@ log_info() {
 }
 
 log_success() {
-    echo -e "${GREEN}[✓]${NC} $1"
+    echo -e "${GREEN}[]${NC} $1"
 }
 
 log_warn() {
-    echo -e "${YELLOW}[⚠]${NC} $1"
+    echo -e "${YELLOW}[]${NC} $1"
 }
 
 log_error() {
-    echo -e "${RED}[✗]${NC} $1"
+    echo -e "${RED}[]${NC} $1"
 }
 
 log_verbose() {
@@ -406,14 +406,14 @@ If you installed a specific skill:
 
 \`\`\`
 $target_dir/
-├── .claude/skills/          # Your skills
-│   └── $COMPONENT/          # Installed component
-├── _bmad/
-│   ├── meta-system/         # MAS core
-│   │   ├── export-tools/    # Export scripts
-│   │   └── registry.yaml    # Component catalog
-│   └── _config/agents/      # Agent configurations
-└── MAS-INSTALL-README.md    # This file
+ .claude/skills/          # Your skills
+    $COMPONENT/          # Installed component
+ _bmad/
+    meta-system/         # MAS core
+       export-tools/    # Export scripts
+       registry.yaml    # Component catalog
+    _config/agents/      # Agent configurations
+ MAS-INSTALL-README.md    # This file
 \`\`\`
 
 ## Common Commands
@@ -441,9 +441,9 @@ main() {
     parse_args "$@"
     check_prereqs
 
-    echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${BLUE}║  MAS Universal Installer v1.0.0                           ║${NC}"
-    echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
+    echo -e "${BLUE}${NC}"
+    echo -e "${BLUE}  MAS Universal Installer v1.0.0                           ${NC}"
+    echo -e "${BLUE}${NC}"
     echo ""
 
     # Resolve target to absolute path (create if doesn't exist)
@@ -485,9 +485,9 @@ main() {
     esac
 
     echo ""
-    echo -e "${GREEN}╔════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║  Installation Complete!                                    ║${NC}"
-    echo -e "${GREEN}╚════════════════════════════════════════════════════════════╝${NC}"
+    echo -e "${GREEN}${NC}"
+    echo -e "${GREEN}  Installation Complete!                                    ${NC}"
+    echo -e "${GREEN}${NC}"
     echo ""
     echo -e "Next: Read ${CYAN}$TARGET/MAS-INSTALL-README.md${NC}"
     echo ""

@@ -1,0 +1,39 @@
+{
+  "name": "meta-skill-name",
+  "version": "1.0.0",
+  "type": "meta",
+  "description": "Creates/modifies [type] skills. Use when [specific use case]",
+  "tags": ["meta", "creation", "modification"],
+  "capabilities": ["skill-creation", "skill-analysis", "skill-optimization"],
+  "type_specific": {
+    "meta": {
+      "creates": ["skill"],
+      "self_improvement": true
+    }
+  },
+  "dependencies": {
+    "skills": ["meta-prompt-generator", "meta-system-validator"],
+    "agents": [],
+    "tools": ["mas-marketplace"]
+  },
+  "compatibility": {
+    "mas": "^2.0.0",
+    "claude": ">=3.5"
+  },
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": "https://github.com/your-org/meta-skill-name",
+  "metadata": {
+    "token_usage": "high",
+    "execution_time": "medium",
+    "difficulty": "advanced",
+    "auto_trigger": true,
+    "cost_credits": 0
+  },
+  "quality": {
+    "validation_status": "unverified",
+    "test_coverage": 0,
+    "security_score": 0,
+    "docs_quality": "basic"
+  }
+}
