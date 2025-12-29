@@ -1,0 +1,30 @@
+{
+  "name": "mas-marketplace-mcp",
+  "version": "1.1.0",
+  "description": "MAS Marketplace MCP Server - Install, search, and publish skills",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node index.js"
+  },
+  "keywords": [
+    "mas",
+    "mcp",
+    "marketplace",
+    "skills",
+    "claude",
+    "ai"
+  ],
+  "author": "MAS Meta-System",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "bin": {
+    "mas-mcp-server": "./index.js"
+  }
+}

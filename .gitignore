@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Backup files
+*.bak
+*~
+.meta-backups/
+
+# Test artifacts
+test-output/
+coverage/
+
+# Environment files
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Temp files
+tmp/
+temp/
+
+# Git
+.git/
+
+# Local development (don't commit)
+*.local
+*.secret

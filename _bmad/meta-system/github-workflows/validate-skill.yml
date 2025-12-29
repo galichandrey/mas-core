@@ -1,0 +1,63 @@
+# Validate Skill Submission
+# Runs when a skill is submitted to marketplace
+
+name: Validate Skill
+
+on:
+  pull_request:
+    paths:
+      - 'skills/**'
+      - 'registry.json'
+  push:
+    branches: [main]
+    paths:
+      - 'skills/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install pyyaml
+
+      - name: Validate structure
+        run: |
+          python3 .github/scripts/validate_skills.py
+
+      - name: Check security
+        run: |
+          python3 .github/scripts/security_scan.py
+
+      - name: Test integration
+        run: |
+          python3 .github/scripts/test_integration.py
+
+      - name: Update registry
+        if: github.ref == 'refs/heads/main'
+        run: |
+          python3 .github/scripts/update_registry.py
+
+      - name: Comment PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const validationReport = fs.readFileSync('/tmp/validation-report.txt', 'utf8');
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## ✅ Skill Validation Report\n\n\`\`\`\n${validationReport}\n\`\`\`\n\n**Status:** Ready for review`
+            });

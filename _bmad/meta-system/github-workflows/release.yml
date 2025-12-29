@@ -1,0 +1,75 @@
+# Auto-release on version tag
+# Creates GitHub release with assets
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: MAS ${{ github.ref_name }}
+          body: |
+            ## MAS ${{ github.ref_name }}
+
+            ### Changes
+            - Meta-skills updated
+            - Export tools enhanced
+            - Registry updated
+
+            ### Installation
+            ```bash
+            curl -sSL https://get.mas.dev | bash -s -- --version ${{ github.ref_name }}
+            ```
+
+            ### Files
+            - `mas-core-${{ github.ref_name }}.tar.gz` - Full system
+            - `mas-skills-${{ github.ref_name }}.tar.gz` - Meta-skills only
+
+            ### Changelog
+            See: [CHANGELOG.md](CHANGELOG.md)
+          draft: false
+          prerelease: false
+
+      - name: Package skills
+        run: |
+          tar -czf mas-skills-${{ github.ref_name }}.tar.gz .claude/skills/
+          tar -czf mas-core-${{ github.ref_name }}.tar.gz _bmad/meta-system/ .claude/skills/
+
+      - name: Upload assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./mas-skills-${{ github.ref_name }}.tar.gz
+          asset_name: mas-skills-${{ github.ref_name }}.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload full package
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./mas-core-${{ github.ref_name }}.tar.gz
+          asset_name: mas-core-${{ github.ref_name }}.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Update registry
+        run: |
+          python3 .github/scripts/update_registry.py --version ${{ github.ref_name }}

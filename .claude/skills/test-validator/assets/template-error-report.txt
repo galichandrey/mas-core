@@ -1,0 +1,14 @@
+JSON Validation Report
+======================
+
+File: {filename}
+Schema: {schema_name}
+Status: {status}
+
+Errors Found:
+{errors}
+
+Suggestions:
+{recommendations}
+
+Generated: {timestamp}

@@ -1,0 +1,333 @@
+# Meta Agentic System - Component Registry
+# Version 1.0.0
+# This file catalogs all available components in the MAS
+
+version: 2.0.0
+last_updated: 2025-12-29
+
+components:
+  # ==================== META SYSTEM METADATA ====================
+  meta_system:
+    version: "2.0.0"
+    installed: "2025-12-29"
+    project: "mas-core"
+    format_version: 2
+    status: "development"
+
+  # ==================== META SKILLS ====================
+  skills:
+    - name: meta-skill-creator
+      version: 1.0.0
+      path: .claude/skills/meta-skill-creator
+      location: .claude/skills/meta-skill-creator
+      description: Creates complete skill packages with SKILL.md, resources, and validation
+      tags: [meta, skill, creation, generator]
+      dependencies: []
+      capabilities:
+        - Generate skill structure
+        - Create resource directories
+        - Validate skill format
+        - Provide templates
+      usage: "Create a skill named [name] for [purpose]"
+
+    - name: meta-agent-factory
+      version: 1.0.0
+      path: .claude/skills/meta-agent-factory
+      location: .claude/skills/meta-agent-factory
+      description: Builds specialized subagents with commands and capabilities
+      tags: [meta, agent, factory, builder]
+      dependencies: []
+      capabilities:
+        - Generate agent configuration
+        - Define custom commands
+        - Specify capabilities
+        - Map integrations
+      usage: "Build an agent named [name] for [domain]"
+
+    - name: meta-prompt-generator
+      version: 1.0.0
+      path: .claude/skills/meta-prompt-generator
+      location: .claude/skills/meta-prompt-generator
+      description: Generates optimized prompts with examples and validation
+      tags: [meta, prompt, generator, template]
+      dependencies: []
+      capabilities:
+        - Create prompt templates
+        - Generate examples
+        - Define constraints
+        - Optimize structure
+      usage: "Generate a prompt for [task]"
+
+    # Existing project skills
+    - name: skill-creator
+      version: 1.0.0
+      path: .claude/skills/skill-creator
+      location: .claude/skills/skill-creator
+      description: Guide for creating effective skills (original)
+      tags: [skill, creation, guide]
+      dependencies: []
+
+    - name: test-generator
+      version: 1.0.0
+      path: .claude/skills/test-generator
+      location: .claude/skills/test-generator
+      description: Generate comprehensive test suites for API endpoints
+      tags: [testing, api, generation]
+      dependencies: []
+
+    - name: frontend-component-test-generator
+      version: 1.0.0
+      path: .claude/skills/frontend-component-test-generator
+      location: .claude/skills/frontend-component-test-generator
+      description: Generate React component tests
+      tags: [frontend, testing, react]
+      dependencies: []
+
+    - name: meta-system-validator
+      version: 1.0.0
+      path: .claude/skills/meta-system-validator
+      location: .claude/skills/meta-system-validator
+      description: Comprehensive validation system for MAS installations
+      tags: [meta, validation, integrity, testing, diagnostics]
+      dependencies: [meta-skill-creator, meta-prompt-generator]
+      capabilities:
+        - Validate system integrity
+        - Check SKILL.md structure
+        - Validate registry.yaml
+        - Test integration workflows
+        - Generate health reports
+      usage: "Use meta-system-validator to validate current project"
+
+    - name: meta-component-updater
+      version: 2.0.0
+      path: .claude/skills/meta-component-updater
+      location: .claude/skills/meta-component-updater
+      description: Updates existing skills with version management, migration scripts, and rollback capabilities
+      tags: [meta, update, version, migration, rollback]
+      dependencies: [meta-skill-creator]
+      capabilities:
+        - Version management
+        - Migration script generation
+        - Automatic backups
+        - Rollback support
+        - Dependency updates
+      usage: "Update meta-skill-creator to version 1.1.0 with breaking changes"
+
+    - name: test-validator
+      version: 1.0.0
+      path: .claude/skills/test-validator
+      location: .claude/skills/test-validator
+      description: Validates JSON files against schemas with detailed error reporting
+      tags: [testing, validation, json, schema]
+      dependencies: []
+      capabilities:
+        - Schema validation
+        - Error reporting
+        - Line number tracking
+      usage: "Validate this JSON against the schema"
+
+  # ==================== META PROMPTS ====================
+  prompts: []
+
+  # ==================== META AGENTS ====================
+  agents:
+    # BMAD Agents (existing)
+    - name: analyst
+      version: 1.0.0
+      location: _bmad/_config/agents/bmm-analyst.customize.yaml
+      description: Business analysis and research
+      tags: [bmad, analysis, research]
+      commands: [workflow-status, brainstorm-project, research, product-brief, document-project]
+
+    - name: pm
+      version: 1.0.0
+      location: _bmad/_config/agents/bmm-pm.customize.yaml
+      description: Product requirements and planning
+      tags: [bmad, product, planning]
+      commands: [workflow-status, create-prd, create-epics-and-stories, implementation-readiness, correct-course]
+
+    - name: architect
+      version: 1.0.0
+      location: _bmad/_config/agents/bmm-architect.customize.yaml
+      description: System architecture and technical design
+      tags: [bmad, architecture, design]
+      commands: [workflow-status, create-architecture, implementation-readiness, create-excalidraw-diagram, create-excalidraw-dataflow]
+
+    - name: sm
+      version: 1.0.0
+      location: _bmad/_config/agents/bmm-sm.customize.yaml
+      description: Sprint planning and story preparation
+      tags: [bmad, sprint, planning]
+      commands: [sprint-planning, create-story, validate-create-story, epic-retrospective, correct-course]
+
+    - name: dev
+      version: 1.0.0
+      location: _bmad/_config/agents/bmm-dev.customize.yaml
+      description: Story implementation and code review
+      tags: [bmad, development, coding]
+      commands: [dev-story, code-review]
+
+    - name: quick-flow-solo-dev
+      version: 1.0.0
+      location: _bmad/_config/agents/bmm-quick-flow-solo-dev.customize.yaml
+      description: Fast solo development without handoffs
+      tags: [bmad, solo, fast]
+      commands: [create-tech-spec, quick-dev, code-review]
+
+    - name: tea
+      version: 1.0.0
+      location: _bmad/_config/agents/bmm-tea.customize.yaml
+      description: Test architecture and quality strategy
+      tags: [bmad, testing, quality]
+      commands: [framework, atdd, automate, test-design, trace, nfr-assess, ci, test-review]
+
+    - name: ux-designer
+      version: 1.0.0
+      location: _bmad/_config/agents/bmm-ux-designer.customize.yaml
+      description: User experience and UI design
+      tags: [bmad, ux, design]
+      commands: [create-ux-design, validate-design, create-excalidraw-wireframe]
+
+    - name: tech-writer
+      version: 1.0.0
+      location: _bmad/_config/agents/bmm-tech-writer.customize.yaml
+      description: Technical documentation and diagrams
+      tags: [bmad, documentation, writing]
+      commands: [document-project, generate-mermaid, create-excalidraw-flowchart, create-excalidraw-diagram, create-excalidraw-dataflow, validate-doc, improve-readme, explain-concept, standards-guide]
+
+  # ==================== TEMPLATES ====================
+  templates:
+    - name: skill-base
+      version: 1.0.0
+      location: _bmad/meta-system/templates/skill-base
+      description: Minimal skill template with structure
+      tags: [template, skill, minimal]
+
+    - name: agent-base
+      version: 1.0.0
+      location: _bmad/meta-system/templates/agent-base
+      description: Minimal agent configuration template
+      tags: [template, agent, minimal]
+
+    - name: prompt-base
+      version: 1.0.0
+      location: _bmad/meta-system/templates/prompt-base
+      description: Minimal prompt template
+      tags: [template, prompt, minimal]
+
+  # ==================== WORKFLOWS ====================
+  workflows:
+    - name: create-skill-workflow
+      version: 1.0.0
+      description: Complete skill creation process
+      steps:
+        - Analyze requirements
+        - Choose pattern
+        - Generate structure
+        - Add content
+        - Validate
+        - Package
+      uses: [meta-skill-creator]
+
+    - name: create-agent-workflow
+      version: 1.0.0
+      description: Complete agent creation process
+      steps:
+        - Define domain
+        - Specify commands
+        - Define capabilities
+        - Map integrations
+        - Test coordination
+      uses: [meta-agent-factory]
+
+    - name: create-prompt-workflow
+      version: 1.0.0
+      description: Complete prompt creation process
+      steps:
+        - Analyze task
+        - Choose pattern
+        - Define structure
+        - Add examples
+        - Test and refine
+      uses: [meta-prompt-generator]
+
+  # ==================== EXPORT TOOLS ====================
+  tools:
+    - name: export-system
+      version: 1.0.0
+      location: _bmad/meta-system/export-tools/export-system.sh
+      description: Copy entire MAS to another project
+      usage: "./export-system.sh /path/to/target"
+      tags: [export, system, copy]
+
+    - name: export-skill
+      version: 1.0.0
+      location: _bmad/meta-system/export-tools/export-skill.sh
+      description: Copy single skill to another project
+      usage: "./export-skill.sh skill-name /path/to/target"
+      tags: [export, skill, copy]
+
+    - name: validate-system
+      version: 1.0.0
+      location: _bmad/meta-system/export-tools/validate-system.sh
+      description: Check system integrity and structure
+      usage: "./validate-system.sh"
+      tags: [validate, check, integrity]
+
+# ==================== USAGE EXAMPLES ====================
+examples:
+  - name: "Create data processing skill"
+    command: "Create a skill named data-processor for CSV validation and transformation"
+    creates: [meta-skill-creator]
+    output: "data-processor/SKILL.md + resources"
+
+  - name: "Build monitoring agent"
+    command: "Build an agent named monitoring-bot for system health checks"
+    creates: [meta-agent-factory]
+    output: "monitoring-bot agent configuration"
+
+  - name: "Generate test prompt"
+    command: "Generate a prompt for creating unit tests"
+    creates: [meta-prompt-generator]
+    output: "Test generation prompt template"
+
+  - name: "Export to new project"
+    command: "Copy MAS to /path/to/new-project"
+    creates: [export-system]
+    output: "Complete MAS in new project"
+
+# ==================== INTEGRATION MAP ====================
+integration:
+  bmad_workflow:
+    - meta-skills create capabilities during each phase
+    - meta-agents coordinate multi-agent workflows
+    - meta-prompts optimize task execution
+
+  skill_ecosystem:
+    - meta-skill-creator builds new skills
+    - existing skills can use meta-skills
+    - skills can be combined and evolved
+
+  agent_teams:
+    - meta-agent-factory builds specialized agents
+    - agents coordinate using shared skills
+    - teams can scale horizontally
+
+# ==================== VERSION HISTORY ====================
+changelog:
+  - version: 1.1.0
+    date: 2025-12-29
+    changes:
+      - Added meta-system-validator skill
+      - Complete validation framework
+      - 4 meta-skills total
+      - Enhanced registry with validation metadata
+
+  - version: 1.0.0
+    date: 2025-12-29
+    changes:
+      - Initial release
+      - 3 meta-skills
+      - 9 BMAD agents
+      - Export tools
+      - Marketplace registry

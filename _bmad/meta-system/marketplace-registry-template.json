@@ -1,0 +1,118 @@
+{
+  "version": "1.0",
+  "last_updated": "2025-12-29",
+  "categories": [
+    "data",
+    "testing",
+    "devops",
+    "frontend",
+    "backend",
+    "security",
+    "productivity"
+  ],
+  "skills": [
+    {
+      "name": "meta-skill-creator",
+      "version": "1.0.0",
+      "author": "MAS Core Team",
+      "category": "productivity",
+      "description": "Creates complete skill packages with SKILL.md, resources, and validation",
+      "tags": ["meta", "skill", "creation", "generator"],
+      "dependencies": [],
+      "downloads": 0,
+      "rating": 5.0,
+      "validation_status": "verified",
+      "security_score": 100,
+      "github": "https://github.com/mas-marketplace/mas-core",
+      "compatibility": ["MAS >= 1.0.0"],
+      "last_updated": "2025-12-29"
+    },
+    {
+      "name": "meta-agent-factory",
+      "version": "1.0.0",
+      "author": "MAS Core Team",
+      "category": "productivity",
+      "description": "Builds specialized subagents with commands and capabilities",
+      "tags": ["meta", "agent", "factory", "builder"],
+      "dependencies": [],
+      "downloads": 0,
+      "rating": 5.0,
+      "validation_status": "verified",
+      "security_score": 100,
+      "github": "https://github.com/mas-marketplace/mas-core",
+      "compatibility": ["MAS >= 1.0.0"],
+      "last_updated": "2025-12-29"
+    },
+    {
+      "name": "meta-prompt-generator",
+      "version": "1.0.0",
+      "author": "MAS Core Team",
+      "category": "productivity",
+      "description": "Generates optimized prompts with examples and validation",
+      "tags": ["meta", "prompt", "generator", "template"],
+      "dependencies": [],
+      "downloads": 0,
+      "rating": 5.0,
+      "validation_status": "verified",
+      "security_score": 100,
+      "github": "https://github.com/mas-marketplace/mas-core",
+      "compatibility": ["MAS >= 1.0.0"],
+      "last_updated": "2025-12-29"
+    },
+    {
+      "name": "meta-system-validator",
+      "version": "1.0.0",
+      "author": "MAS Core Team",
+      "category": "testing",
+      "description": "Comprehensive validation system for MAS installations with 3-tier checks",
+      "tags": ["meta", "validation", "integrity", "testing", "diagnostics"],
+      "dependencies": ["meta-skill-creator", "meta-prompt-generator"],
+      "downloads": 0,
+      "rating": 5.0,
+      "validation_status": "verified",
+      "security_score": 100,
+      "github": "https://github.com/mas-marketplace/mas-core",
+      "compatibility": ["MAS >= 1.1.0"],
+      "last_updated": "2025-12-29"
+    }
+  ],
+  "export_tools": [
+    {
+      "name": "installer.sh",
+      "version": "1.0.0",
+      "description": "One-line installation from GitHub",
+      "usage": "curl -sSL https://get.mas.dev | bash"
+    },
+    {
+      "name": "updater.sh",
+      "version": "1.0.0",
+      "description": "Update MAS to latest version",
+      "usage": "./_bmad/meta-system/export-tools/updater.sh"
+    },
+    {
+      "name": "publisher.sh",
+      "version": "1.0.0",
+      "description": "Publish skills to marketplace",
+      "usage": "./_bmad/meta-system/export-tools/publisher.sh --submit skill-name"
+    },
+    {
+      "name": "marketplace.sh",
+      "version": "1.0.0",
+      "description": "Search and browse marketplace",
+      "usage": "./_bmad/meta-system/export-tools/marketplace.sh --search testing"
+    }
+  ],
+  "mcp_server": {
+    "version": "1.1.0",
+    "description": "MCP server for protocol-based marketplace access",
+    "tools": [
+      "mas_search_skills",
+      "mas_install_skill",
+      "mas_validate_skill",
+      "mas_update",
+      "mas_publish_skill",
+      "mas_list_skills",
+      "mas_skill_info"
+    ]
+  }
+}
